@@ -159,8 +159,10 @@
       background: var(--dark);
     }
 
-    /* --- Difficulty Screen Styles --- */
     .difficulty-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
       max-width: 500px;
       margin: 50px auto;
@@ -169,44 +171,12 @@
       border-radius: 10px;
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     }
-    
-    .difficulty-screen h2 {
-      text-align: center;
-      border-bottom: none;
-      font-size: 1.8em;
-      margin-bottom: 30px;
+
+    .difficulty-screen button {
+      width: 100%;
+      margin: 10px 0;
     }
 
-    .difficulty-options {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-    }
-    
-    .difficulty-option {
-        background-color: white;
-        color: var(--dark);
-        border: 2px solid var(--primary);
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        font-size: 1.5em;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-        padding: 0;
-        margin: 0;
-    }
-    
-    .difficulty-option:hover {
-        background-color: var(--primary);
-        color: white;
-        transform: scale(1.1);
-    }
-    
     /* --- Rules Modal & Visuals Styles --- */
     .modal {
       display: none;
@@ -328,11 +298,9 @@
   <body>
     <div class="difficulty-screen" id="difficulty-screen">
       <h2>Select Difficulty</h2>
-      <div class="difficulty-options">
-          <button class="difficulty-option" onclick="startGame(3)">1</button>
-          <button class="difficulty-option" onclick="startGame(4)">2</button>
-          <button class="difficulty-option" onclick="startGame(5)">3</button>
-      </div>
+      <button onclick="startGame(3)">Easy (3 Atoms)</button>
+      <button onclick="startGame(4)">Medium (4 Atoms)</button>
+      <button onclick="startGame(5)">Hard (5 Atoms)</button>
     </div>
 
     <div id="game-container" style="display: none">
@@ -452,12 +420,13 @@
           }
         }
       }
-      
+
+      // --- BOARD NUMBERING REVERTED & FIXED ---
       function getBorderNumber(r, c) {
-        if (r === 0 && c >= 1 && c <= 8) return c;
-        if (c === 9 && r >= 1 && r <= 8) return 8 + r;
-        if (r === 9 && c >= 1 && c <= 8) return 25 - c;
-        if (c === 0 && r >= 1 && r <= 8) return 33 - r;
+        if (r === 0 && c >= 1 && c <= 8) return c; // Top: 1-8
+        if (c === 9 && r >= 1 && r <= 8) return 8 + r; // Right: 9-16
+        if (r === 9 && c >= 1 && c <= 8) return 25 - c; // Bottom: 17-24 (Reversed)
+        if (c === 0 && r >= 1 && r <= 8) return 33 - r; // Left: 25-32 (Reversed)
         return null;
       }
 
