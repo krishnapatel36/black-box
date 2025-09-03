@@ -83,13 +83,12 @@
     }
 
     #how-to-play-btn {
-      /* --- Changed to be always visible --- */
       position: fixed;
       top: 20px;
       left: 20px;
       padding: 8px 16px;
       font-size: 0.9em;
-      z-index: 1001; /* To appear above game content */
+      z-index: 1001;
     }
 
     .board {
@@ -102,7 +101,6 @@
       transition: box-shadow 0.5s ease-in-out;
     }
 
-    /* --- Simple winner celebration style --- */
     .winner-celebration {
       animation: flash-border 0.5s 3;
     }
@@ -204,7 +202,6 @@
       margin: 15px auto;
     }
 
-    /* --- Modal Styles --- */
     .modal {
       display: none;
       position: fixed;
@@ -270,7 +267,6 @@
       cursor: pointer;
     }
 
-    /* Media Queries for Small Screens */
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -364,7 +360,7 @@
         <p id="guess-count">Guesses: 0</p>
 
         <div class="controls">
-           <button id="remove-guess-btn" style="display: none">
+          <button id="remove-guess-btn" style="display: none">
             Remove Guess
           </button>
           <button id="reveal">Reveal Atoms</button>
@@ -383,7 +379,7 @@
       const logEntries = document.getElementById("log-entries");
       const guessCountDisplay = document.getElementById("guess-count");
       const revealBtn = document.getElementById("reveal");
-      const removeGuessBtn = document.getElementById("remove-guess-btn"); // Get the new button
+      const removeGuessBtn = document.getElementById("remove-guess-btn");
 
       let atomCount = 4;
       const SIZE = 10;
@@ -392,10 +388,7 @@
       let playerGuesses = [];
       let usedRays = new Set();
       let revealed = false;
-
-      // --- New variable to track which guess to remove ---
       let selectedGuessForRemoval = null;
-
       let raysAbsorbed = 0;
       let raysReflected = 0;
       let raysExited = 0;
@@ -437,7 +430,6 @@
           for (let c = 0; c < SIZE; c++) {
             const cell = document.createElement("div");
             cell.classList.add("cell");
-
             if (
               (r === 0 || r === SIZE - 1 || c === 0 || c === SIZE - 1) &&
               !(r === 0 && c === 0) &&
@@ -455,7 +447,6 @@
             } else {
               cell.addEventListener("click", () => handleCellClick(r, c));
             }
-
             board.appendChild(cell);
           }
         }
@@ -470,105 +461,86 @@
       }
 
       function getEntry(num) {
-        if (num >= 1 && num <= 8)
-          return { pos: { r: 0, c: num }, dir: { r: 1, c: 0 } };
-        if (num >= 9 && num <= 16)
-          return { pos: { r: num - 8, c: 9 }, dir: { r: 0, c: -1 } };
-        if (num >= 17 && num <= 24)
-          return { pos: { r: 9, c: 25 - num }, dir: { r: -1, c: 0 } };
-        if (num >= 25 && num <= 32)
-          return { pos: { r: 33 - num, c: 0 }, dir: { r: 0, c: 1 } };
+        if (num >= 1 && num <= 8) return { pos: { r: 0, c: num }, dir: { r: 1, c: 0 } };
+        if (num >= 9 && num <= 16) return { pos: { r: num - 8, c: 9 }, dir: { r: 0, c: -1 } };
+        if (num >= 17 && num <= 24) return { pos: { r: 9, c: 25 - num }, dir: { r: -1, c: 0 } };
+        if (num >= 25 && num <= 32) return { pos: { r: 33 - num, c: 0 }, dir: { r: 0, c: 1 } };
         return null;
       }
+      
+      // --- BUGFIX: New helper function to check for atoms ---
+      function isAtomAt(r, c) {
+        return atoms.includes(r * SIZE + c);
+      }
 
+      // --- BUGFIX: Complete rewrite of the fireRay function for accuracy ---
       function fireRay(entry, cell) {
         if (usedRays.has(entry) || revealed) return;
         usedRays.add(entry);
         cell.style.backgroundColor = "#aaa";
         guessCount++;
         updateGuessCount();
+
         let { pos, dir } = getEntry(entry);
-        const firstInside = { r: pos.r + dir.r, c: pos.c + dir.c };
-        if (
-          firstInside.r > 0 &&
-          firstInside.r < SIZE - 1 &&
-          firstInside.c > 0 &&
-          firstInside.c < SIZE - 1
-        ) {
-          const firstIdx = firstInside.r * SIZE + firstInside.c;
-          if (atoms.includes(firstIdx)) {
-            raysAbsorbed++;
-            logEntries.innerHTML += `<div>Ray ${entry} → Absorbed</div>`;
+        let currentPos = { r: pos.r + dir.r, c: pos.c + dir.c };
+
+        // 1. Check for immediate Hit (Absorption)
+        if (isAtomAt(currentPos.r, currentPos.c)) {
+            logEntries.innerHTML += `<div>Ray ${entry} → Hit</div>`;
             logEntries.scrollTop = logEntries.scrollHeight;
             return;
-          }
-          const instantReflect = atoms.some((aIdx) => {
-            const ar = Math.floor(aIdx / SIZE);
-            const ac = aIdx % SIZE;
-            const isFirstInnerLayer =
-              ar === 1 || ar === SIZE - 2 || ac === 1 || ac === SIZE - 2;
-            if (!isFirstInnerLayer) return false;
-            const manhattan =
-              Math.abs(ar - firstInside.r) + Math.abs(ac - firstInside.c);
-            return manhattan === 1;
-          });
-          if (instantReflect) {
-            raysReflected++;
-            logEntries.innerHTML += `<div>Ray ${entry} → Reflected </div>`;
-            logEntries.scrollTop = logEntries.scrollHeight;
-            return;
-          }
         }
-        let firstMove = true;
-        while (true) {
-          pos = { r: pos.r + dir.r, c: pos.c + dir.c };
-          if (
-            pos.r === 0 ||
-            pos.r === SIZE - 1 ||
-            pos.c === 0 ||
-            pos.c === SIZE - 1
-          ) {
-            const exit = getBorderNumber(pos.r, pos.c);
-            if (exit === entry && firstMove) {
-              raysReflected++;
-              logEntries.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
-              logEntries.scrollTop = logEntries.scrollHeight;
-            } else {
-              raysExited++;
-              logEntries.innerHTML += `<div>Ray ${entry} → Exited at ${exit}</div>`;
-              logEntries.scrollTop = logEntries.scrollHeight;
-            }
-            return;
-          }
-          const idx = pos.r * SIZE + pos.c;
-          if (atoms.includes(idx)) {
-            raysAbsorbed++;
-            logEntries.innerHTML += `<div>Ray ${entry} → Absorbed</div>`;
+
+        // 2. Check for immediate Reflection at the edge
+        const neighbors = [
+            { r: currentPos.r - 1, c: currentPos.c },
+            { r: currentPos.r + 1, c: currentPos.c },
+            { r: currentPos.r, c: currentPos.c - 1 },
+            { r: currentPos.r, c: currentPos.c + 1 },
+        ];
+        if (neighbors.some(n => isAtomAt(n.r, n.c))) {
+            logEntries.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
             logEntries.scrollTop = logEntries.scrollHeight;
             return;
-          }
-          const diagonals = getDiagonals(pos);
-          const occupiedDiagonals = diagonals
-            .filter((d) => atoms.includes(d.r * SIZE + d.c))
-            .map((d) => d.name);
-          if (
-            (occupiedDiagonals.includes("NW") &&
-              occupiedDiagonals.includes("SE")) ||
-            (occupiedDiagonals.includes("NE") &&
-              occupiedDiagonals.includes("SW"))
-          ) {
-            if (firstMove) {
-              raysReflected++;
-              logEntries.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
-              logEntries.scrollTop = logEntries.scrollHeight;
-            }
-            return;
-          }
-          if (occupiedDiagonals.length === 1) {
-            dir = deflect(dir, occupiedDiagonals[0]);
-          }
-          firstMove = false;
         }
+
+        // 3. Simulate the ray's path
+        for (let i = 0; i < 50; i++) { // Loop with a limit to prevent infinite bounces
+            const diagonals = getDiagonals(currentPos);
+            const occupiedDiagonals = diagonals.filter(d => isAtomAt(d.r, d.c));
+
+            if (occupiedDiagonals.length >= 2) {
+                // Reflection: reverse direction and continue path
+                dir = { r: -dir.r, c: -dir.c };
+            } else if (occupiedDiagonals.length === 1) {
+                // Deflection: change direction
+                dir = deflect(dir, occupiedDiagonals[0].name);
+            }
+
+            currentPos = { r: currentPos.r + dir.r, c: currentPos.c + dir.c };
+
+            // Check for Hit on the new position
+            if (isAtomAt(currentPos.r, currentPos.c)) {
+                logEntries.innerHTML += `<div>Ray ${entry} → Hit</div>`;
+                logEntries.scrollTop = logEntries.scrollHeight;
+                return;
+            }
+
+            // Check for Exit
+            if (currentPos.r <= 0 || currentPos.r >= SIZE - 1 || currentPos.c <= 0 || currentPos.c >= SIZE - 1) {
+                const exit = getBorderNumber(currentPos.r, currentPos.c);
+                if (exit === entry) {
+                    logEntries.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
+                } else {
+                    logEntries.innerHTML += `<div>Ray ${entry} → Exited at ${exit}</div>`;
+                }
+                logEntries.scrollTop = logEntries.scrollHeight;
+                return;
+            }
+        }
+        // If the ray gets stuck in a loop
+        logEntries.innerHTML += `<div>Ray ${entry} → Path lost in box</div>`;
+        logEntries.scrollTop = logEntries.scrollHeight;
       }
 
       function getDiagonals(pos) {
@@ -581,35 +553,27 @@
       }
 
       function deflect(dir, diag) {
-        if ((dir.r === 1 && dir.c === 0) || (dir.r === -1 && dir.c === 0)) {
-          return diag === "NW" || diag === "SW"
-            ? { r: 0, c: 1 }
-            : { r: 0, c: -1 };
+        // Moving vertically (dir.c is 0)
+        if (dir.c === 0) {
+            return (diag.includes("W")) ? { r: 0, c: 1 } : { r: 0, c: -1 };
         }
-        if ((dir.r === 0 && dir.c === 1) || (dir.r === 0 && dir.c === -1)) {
-          return diag === "NW" || diag === "NE"
-            ? { r: 1, c: 0 }
-            : { r: -1, c: 0 };
+        // Moving horizontally (dir.r is 0)
+        if (dir.r === 0) {
+            return (diag.includes("N")) ? { r: 1, c: 0 } : { r: -1, c: 0 };
         }
         return dir;
       }
       
-      // --- MODIFIED guess removal logic ---
       function handleCellClick(r, c) {
         if (revealed) return;
-
         const idx = r * SIZE + c;
-        
-        // Case 1: Clicked an existing guess
         if (playerGuesses.includes(idx)) {
           selectedGuessForRemoval = idx;
-          removeGuessBtn.style.display = 'inline-block'; // Show the remove button
+          removeGuessBtn.style.display = 'inline-block';
         } 
-        // Case 2: Clicked an empty cell to add a new guess
         else if (playerGuesses.length < atomCount) {
           playerGuesses.push(idx);
           board.children[idx].classList.add("guess");
-          // Hide remove button when placing a new guess
           removeGuessBtn.style.display = 'none';
           selectedGuessForRemoval = null;
         }
@@ -617,16 +581,12 @@
 
       removeGuessBtn.addEventListener('click', () => {
           if (selectedGuessForRemoval !== null) {
-              // Remove the guess from the array
               playerGuesses = playerGuesses.filter(i => i !== selectedGuessForRemoval);
-              // Remove the visual class from the cell
               board.children[selectedGuessForRemoval].classList.remove('guess');
-              // Hide the button and reset the selection
               removeGuessBtn.style.display = 'none';
               selectedGuessForRemoval = null;
           }
       });
-
 
       function updateGuessCount() {
         guessCountDisplay.textContent = `Guesses: ${guessCount}`;
@@ -635,19 +595,18 @@
       revealBtn.addEventListener("click", () => {
         if (revealed) return;
         revealed = true;
-        removeGuessBtn.style.display = 'none'; // Hide remove button on reveal
+        removeGuessBtn.style.display = 'none';
 
         atoms.forEach((idx) => board.children[idx].classList.add("atom"));
         let correct = playerGuesses.filter((g) => atoms.includes(g)).length;
         let message = `Game Over! You guessed ${correct}/${atomCount} atom(s) correctly.`;
 
-        // --- SIMPLIFIED winner celebration ---
         if (correct === atomCount) {
           message = `Congratulations! You found all ${atomCount} atoms.`;
           board.classList.add('winner-celebration');
           setTimeout(() => {
               board.classList.remove('winner-celebration');
-          }, 1500); // Animation lasts 1.5s
+          }, 1500);
         } else if (correct >= atomCount - 1) {
           message += " Very Good!";
         } else if (correct === 0) {
@@ -658,7 +617,6 @@
         logEntries.scrollTop = logEntries.scrollHeight;
       });
 
-      // --- Modal Logic ---
       const modal = document.getElementById("rules-modal");
       const howToPlayBtn = document.getElementById("how-to-play-btn");
       const closeBtn = document.querySelector(".close-btn");
