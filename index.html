@@ -21,12 +21,57 @@
       margin: 0;
       padding: 20px;
       line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* --- Main Layout --- */
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 20px;
+    }
+
+    .rules-panel {
+      flex: 1 1 300px; /* Increased min-width for better layout */
+      min-width: 300px;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-top: 100px;
+    }
+    
+    .game-area {
+      flex: 2 1 500px;
+      min-width: 300px;
+      text-align: center;
+    }
+    
+    .log-panel {
+      flex: 1 1 220px;
+      min-width: 220px;
+      max-width: 250px;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      height: 550px; 
+      display: flex;
+      flex-direction: column;
+      margin-top: 100px;
     }
 
     h1 {
       color: var(--dark);
       text-align: center;
-      margin-bottom: 10px;
+      margin: 0 0 10px 0;
       font-size: 2.2em;
     }
 
@@ -34,30 +79,19 @@
       color: var(--dark);
       border-bottom: 2px solid var(--primary);
       padding-bottom: 5px;
-      margin-bottom: 15px;
+      margin-top: 0;
       font-size: 1.4em;
     }
 
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-      justify-content: center;
+    h4 {
+        margin-top: 15px;
+        margin-bottom: 5px;
     }
 
-    .log-panel {
-      flex: 1 1 250px;
-      min-width: 250px;
-      background: #ffffff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      max-height: 500px;
-      margin-top: 120px;
-      display: flex;
-      flex-direction: column;
+    .rule-text {
+        font-size: 0.9em;
+        margin-top: 0;
+        min-height: 30px; 
     }
 
     #log-entries {
@@ -68,27 +102,6 @@
     #log-entries div {
       padding: 8px 0;
       border-bottom: 1px solid #eee;
-    }
-
-    .game-area {
-      flex: 2 1 400px;
-      min-width: 300px;
-      text-align: center;
-    }
-
-    .header {
-      position: relative;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
-    #how-to-play-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      padding: 8px 16px;
-      font-size: 0.9em;
-      z-index: 1001;
     }
 
     .board {
@@ -149,12 +162,6 @@
       opacity: 0.7;
     }
 
-    #guess-count {
-      font-size: 1.2em;
-      margin: 15px 0;
-      font-weight: 600;
-    }
-
     button {
       background: var(--primary);
       color: white;
@@ -163,7 +170,7 @@
       font-size: 1em;
       border-radius: 6px;
       cursor: pointer;
-      margin: 10px;
+      margin: 5px;
       transition: background 0.2s;
       font-weight: 600;
     }
@@ -177,6 +184,13 @@
     }
     #remove-guess-btn:hover {
         background-color: var(--reflection);
+    }
+
+    #how-to-play-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
     }
 
     .difficulty-screen {
@@ -195,11 +209,24 @@
       font-size: 1.8em;
       margin-bottom: 30px;
     }
-
-    .difficulty-screen button {
-      display: block;
-      width: 200px;
-      margin: 15px auto;
+    
+    /* --- NEW styles for rules panel --- */
+    .rules-columns {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      align-items: start;
+    }
+    .rule-item {
+      text-align: center;
+    }
+    .rule-item img {
+      max-width: 120px;
+      height: auto;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      margin-top: 5px;
+      background-color: white;
     }
 
     .modal {
@@ -226,31 +253,6 @@
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 
-    .modal-content h2 {
-      text-align: center;
-      border: none;
-      margin-top: 0;
-    }
-
-    .modal-content h4 {
-      margin-top: 20px;
-      margin-bottom: 5px;
-      color: var(--dark);
-      border-bottom: 1px solid #eee;
-      padding-bottom: 3px;
-    }
-    .modal-content p,
-    .modal-content ul {
-      margin-top: 0;
-      text-align: left;
-    }
-    .modal-content ul {
-      padding-left: 20px;
-    }
-    .modal-content li {
-      margin-bottom: 8px;
-    }
-
     .close-btn {
       color: #aaa;
       position: absolute;
@@ -258,89 +260,33 @@
       right: 20px;
       font-size: 35px;
       font-weight: bold;
-    }
-
-    .close-btn:hover,
-    .close-btn:focus {
-      color: black;
-      text-decoration: none;
       cursor: pointer;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 1100px) { /* Adjusted breakpoint */
       .container {
         flex-direction: column;
-        padding: 10px;
+        align-items: center;
       }
-
-      .log-panel,
-      .game-area {
-        width: 100%;
+      .rules-panel, .log-panel, .game-area {
+        width: 90%;
+        max-width: 500px;
+        flex-basis: auto;
       }
-
-      .board {
-        max-width: 100%;
-        grid-template-columns: repeat(10, 1fr);
+      .rules-panel {
+        order: 3; 
       }
-
-      .cell {
-        font-size: 0.7rem;
-      }
+    }
+    
+    @media (max-width: 400px) {
+        .rules-columns {
+            grid-template-columns: 1fr; /* Single column on very small screens */
+        }
     }
   </style>
   <body>
-    <button id="how-to-play-btn">How to Play</button>
 
-    <div id="rules-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2>How to Play</h2>
-        <h4>1. The Goal</h4>
-        <p>
-          Find the hidden atoms inside the box by shooting rays from the
-          numbered ports on the edge.
-        </p>
-        <h4>2. Firing Rays</h4>
-        <p>
-          Click a number to fire a ray. Observe the result in the Game Log.
-          There are 3 possible outcomes:
-        </p>
-        <ul>
-          <li>
-            <strong>Exited:</strong> The ray passed through and exited at a
-            different port.
-          </li>
-          <li>
-            <strong>Hit / Absorbed:</strong> The ray hit an atom head-on.
-          </li>
-          <li>
-            <strong>Reflected:</strong> The ray exited from the same port it
-            entered.
-          </li>
-        </ul>
-        <h4>3. Ray Behavior</h4>
-        <ul>
-          <li>
-            A ray is <strong>deflected 90°</strong> when it passes a cell
-            diagonally adjacent to an atom.
-          </li>
-          <li>
-            A ray is <strong>reflected (U-Turn)</strong> if it passes a cell
-            diagonally adjacent to two atoms.
-          </li>
-          <li>
-            A ray entering right next to an atom on the edge is also
-            <strong>reflected</strong>.
-          </li>
-        </ul>
-        <h4>4. Guessing</h4>
-        <p>
-          Click any cell in the grid to place a guess marker. Click a marker to
-          select it for removal. When you've placed all your guesses, click "Reveal
-          Atoms" to check your score.
-        </p>
-      </div>
-    </div>
+    <button id="how-to-play-btn">How to Play</button>
 
     <div class="difficulty-screen" id="difficulty-screen">
       <h2>Select Difficulty</h2>
@@ -350,19 +296,42 @@
     </div>
 
     <div class="container" id="game-container" style="display: none">
-      <div class="game-area">
-        <div class="header">
-          <h1>Black Box</h1>
+      <div class="rules-panel">
+        <h2>How It Works</h2>
+        <div class="rules-columns">
+          <div class="rule-item">
+            <h4>Exited</h4>
+            <p class="rule-text">Ray passes through.</p>
+            <img src="pass.png" alt="Ray passing straight through" />
+          </div>
+
+          <div class="rule-item">
+            <h4>Absorbed</h4>
+            <p class="rule-text">Ray hits an atom.</p>
+            <img src="hit.png" alt="A ray hitting an atom" />
+          </div>
+          
+          <div class="rule-item">
+            <h4>Deflected</h4>
+            <p class="rule-text">Ray turns 90°.</p>
+            <img src="deflected.png" alt="A ray deflecting around an atom" />
+          </div>
+
+          <div class="rule-item">
+            <h4>Reflected</h4>
+            <p class="rule-text">Ray reverses.</p>
+            <img src="reflected.png" alt="A ray reflecting back" />
+          </div>
         </div>
+      </div>
+
+      <div class="game-area">
+        <h1>Black Box</h1>
         <p>Click a border number (1–32) to fire a ray</p>
         <div id="board" class="board"></div>
-
         <p id="guess-count">Guesses: 0</p>
-
         <div class="controls">
-          <button id="remove-guess-btn" style="display: none">
-            Remove Guess
-          </button>
+          <button id="remove-guess-btn" style="display: none">Remove Guess</button>
           <button id="reveal">Reveal Atoms</button>
           <button onclick="location.reload()">Restart Game</button>
         </div>
@@ -374,12 +343,40 @@
       </div>
     </div>
 
+    <div id="rules-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>How to Play</h2>
+        <h4>1. The Goal</h4>
+        <p>Find the hidden atoms by shooting rays into the box.</p>
+        <h4>2. Firing Rays & Outcomes</h4>
+        <p>Click a number to fire a ray. The result will appear in the Game Log:</p>
+        <ul>
+            <li><b>Exited:</b> The ray passed through and exited at a different port.</li>
+            <li><b>Hit / Absorbed:</b> The ray hit an atom head-on.</li>
+            <li><b>Reflected:</b> The ray exited from the same port it entered.</li>
+        </ul>
+        <h4>3. Ray Behavior</h4>
+        <ul>
+            <li>A ray is <b>deflected 90°</b> when it passes a cell diagonally adjacent to an atom.</li>
+            <li>A ray is <b>reflected (U-Turn)</b> if it passes a cell diagonally adjacent to <i>two</i> atoms.</li>
+            <li>A ray entering right next to an atom on the edge is also <b>reflected</b>.</li>
+        </ul>
+        <h4>4. Guessing</h4>
+        <p>Click any cell to place a guess marker. Click a marker to select it for removal. When you've placed all your guesses, click "Reveal Atoms" to see your score.</p>
+      </div>
+    </div>
+
+
     <script>
       const board = document.getElementById("board");
       const logEntries = document.getElementById("log-entries");
       const guessCountDisplay = document.getElementById("guess-count");
       const revealBtn = document.getElementById("reveal");
       const removeGuessBtn = document.getElementById("remove-guess-btn");
+      const modal = document.getElementById("rules-modal");
+      const howToPlayBtn = document.getElementById("how-to-play-btn");
+      const closeBtn = document.querySelector(".close-btn");
 
       let atomCount = 4;
       const SIZE = 10;
@@ -389,9 +386,6 @@
       let usedRays = new Set();
       let revealed = false;
       let selectedGuessForRemoval = null;
-      let raysAbsorbed = 0;
-      let raysReflected = 0;
-      let raysExited = 0;
 
       function startGame(count) {
         atomCount = count;
@@ -406,9 +400,6 @@
 
       function resetStats() {
         guessCount = 0;
-        raysAbsorbed = 0;
-        raysReflected = 0;
-        raysExited = 0;
         usedRays.clear();
         playerGuesses = [];
         logEntries.innerHTML = "";
@@ -434,7 +425,7 @@
               (r === 0 || r === SIZE - 1 || c === 0 || c === SIZE - 1) &&
               !(r === 0 && c === 0) &&
               !(r === 0 && c === SIZE - 1) &&
-              !(r === SIZE - 1 && c === 0) &&
+              !(r === 0 && c === 0) &&
               !(r === SIZE - 1 && c === SIZE - 1)
             ) {
               const num = getBorderNumber(r, c);
@@ -468,12 +459,10 @@
         return null;
       }
       
-      // --- BUGFIX: New helper function to check for atoms ---
       function isAtomAt(r, c) {
         return atoms.includes(r * SIZE + c);
       }
 
-      // --- BUGFIX: Complete rewrite of the fireRay function for accuracy ---
       function fireRay(entry, cell) {
         if (usedRays.has(entry) || revealed) return;
         usedRays.add(entry);
@@ -484,19 +473,15 @@
         let { pos, dir } = getEntry(entry);
         let currentPos = { r: pos.r + dir.r, c: pos.c + dir.c };
 
-        // 1. Check for immediate Hit (Absorption)
         if (isAtomAt(currentPos.r, currentPos.c)) {
-            logEntries.innerHTML += `<div>Ray ${entry} → Hit</div>`;
+            logEntries.innerHTML += `<div>Ray ${entry} → Absorbed</div>`;
             logEntries.scrollTop = logEntries.scrollHeight;
             return;
         }
 
-        // 2. Check for immediate Reflection at the edge
         const neighbors = [
-            { r: currentPos.r - 1, c: currentPos.c },
-            { r: currentPos.r + 1, c: currentPos.c },
-            { r: currentPos.r, c: currentPos.c - 1 },
-            { r: currentPos.r, c: currentPos.c + 1 },
+            { r: currentPos.r - 1, c: currentPos.c }, { r: currentPos.r + 1, c: currentPos.c },
+            { r: currentPos.r, c: currentPos.c - 1 }, { r: currentPos.r, c: currentPos.c + 1 },
         ];
         if (neighbors.some(n => isAtomAt(n.r, n.c))) {
             logEntries.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
@@ -504,29 +489,24 @@
             return;
         }
 
-        // 3. Simulate the ray's path
-        for (let i = 0; i < 50; i++) { // Loop with a limit to prevent infinite bounces
+        for (let i = 0; i < 50; i++) { 
             const diagonals = getDiagonals(currentPos);
             const occupiedDiagonals = diagonals.filter(d => isAtomAt(d.r, d.c));
 
             if (occupiedDiagonals.length >= 2) {
-                // Reflection: reverse direction and continue path
                 dir = { r: -dir.r, c: -dir.c };
             } else if (occupiedDiagonals.length === 1) {
-                // Deflection: change direction
                 dir = deflect(dir, occupiedDiagonals[0].name);
             }
 
             currentPos = { r: currentPos.r + dir.r, c: currentPos.c + dir.c };
 
-            // Check for Hit on the new position
             if (isAtomAt(currentPos.r, currentPos.c)) {
-                logEntries.innerHTML += `<div>Ray ${entry} → Hit</div>`;
+                logEntries.innerHTML += `<div>Ray ${entry} → Absorbed</div>`;
                 logEntries.scrollTop = logEntries.scrollHeight;
                 return;
             }
 
-            // Check for Exit
             if (currentPos.r <= 0 || currentPos.r >= SIZE - 1 || currentPos.c <= 0 || currentPos.c >= SIZE - 1) {
                 const exit = getBorderNumber(currentPos.r, currentPos.c);
                 if (exit === entry) {
@@ -538,29 +518,20 @@
                 return;
             }
         }
-        // If the ray gets stuck in a loop
-        logEntries.innerHTML += `<div>Ray ${entry} → Path lost in box</div>`;
+        logEntries.innerHTML += `<div>Ray ${entry} → Path lost</div>`;
         logEntries.scrollTop = logEntries.scrollHeight;
       }
 
       function getDiagonals(pos) {
         return [
-          { r: pos.r - 1, c: pos.c - 1, name: "NW" },
-          { r: pos.r - 1, c: pos.c + 1, name: "NE" },
-          { r: pos.r + 1, c: pos.c - 1, name: "SW" },
-          { r: pos.r + 1, c: pos.c + 1, name: "SE" },
+          { r: pos.r - 1, c: pos.c - 1, name: "NW" }, { r: pos.r - 1, c: pos.c + 1, name: "NE" },
+          { r: pos.r + 1, c: pos.c - 1, name: "SW" }, { r: pos.r + 1, c: pos.c + 1, name: "SE" },
         ];
       }
 
       function deflect(dir, diag) {
-        // Moving vertically (dir.c is 0)
-        if (dir.c === 0) {
-            return (diag.includes("W")) ? { r: 0, c: 1 } : { r: 0, c: -1 };
-        }
-        // Moving horizontally (dir.r is 0)
-        if (dir.r === 0) {
-            return (diag.includes("N")) ? { r: 1, c: 0 } : { r: -1, c: 0 };
-        }
+        if (dir.c === 0) return (diag.includes("W")) ? { r: 0, c: 1 } : { r: 0, c: -1 };
+        if (dir.r === 0) return (diag.includes("N")) ? { r: 1, c: 0 } : { r: -1, c: 0 };
         return dir;
       }
       
@@ -599,27 +570,16 @@
 
         atoms.forEach((idx) => board.children[idx].classList.add("atom"));
         let correct = playerGuesses.filter((g) => atoms.includes(g)).length;
-        let message = `Game Over! You guessed ${correct}/${atomCount} atom(s) correctly.`;
+        let message = `Game Over! You found ${correct}/${atomCount} atom(s).`;
 
         if (correct === atomCount) {
           message = `Congratulations! You found all ${atomCount} atoms.`;
           board.classList.add('winner-celebration');
-          setTimeout(() => {
-              board.classList.remove('winner-celebration');
-          }, 1500);
-        } else if (correct >= atomCount - 1) {
-          message += " Very Good!";
-        } else if (correct === 0) {
-          message += " Try again!";
+          setTimeout(() => board.classList.remove('winner-celebration'), 1500);
         }
-
         logEntries.innerHTML += `<div><strong>${message}</strong></div>`;
         logEntries.scrollTop = logEntries.scrollHeight;
       });
-
-      const modal = document.getElementById("rules-modal");
-      const howToPlayBtn = document.getElementById("how-to-play-btn");
-      const closeBtn = document.querySelector(".close-btn");
 
       howToPlayBtn.addEventListener("click", () => {
         modal.style.display = "block";
@@ -637,3 +597,4 @@
     </script>
   </body>
 </html>
+
