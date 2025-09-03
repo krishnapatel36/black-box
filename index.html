@@ -1,375 +1,681 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Black Box Game</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            /* Light Theme Vars (for difficulty screen) */
-            --light-bg: #fdfbf5;
-            --light-surface: #ffffff;
-            --light-text: #a0aec0;
-            --light-text-dark: #000000;
-            --light-primary-btn: #f0f0f0;
+  </head>
+  <style>
+    :root {
+      --primary: rgba(180, 212, 75);
+      --dark: #2c3e50;
+      --light: #ecf0f1;
+      --highlight: #e74c3c;
+      --reflection: #c0392b;
+    }
 
-            /* Dark Theme Vars (for main game) */
-            --dark-bg: #1a202c;
-            --dark-surface: #2d3748;
-            --dark-border: #4a5568;
-            --dark-text-main: #e2e8f0;
-            --dark-text-secondary: #a0aec0;
-            --dark-highlight: #63b3ed;
-            --dark-reveal-btn: #f59e0b;
-            --dark-new-game-btn: #4a5568;
-            
-            /* Universal Game Vars */
-            --hit: #ef4444;
-            --reflect: #f59e0b;
-            --path: #3b82f6;
-            --guess-color: #e74c3c;
-            --atom-correct: #10b981;
-        }
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background-color: #fefbe3;
+      color: var(--dark);
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            transition: background-color 0.5s ease;
-        }
-        
-        .log-panel::-webkit-scrollbar { width: 6px; }
-        .log-panel::-webkit-scrollbar-track { background: var(--dark-surface); }
-        .log-panel::-webkit-scrollbar-thumb { background: var(--dark-border); border-radius: 3px;}
+    h1 {
+      color: var(--dark);
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2.2em;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
+    h2 {
+      color: var(--dark);
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      font-size: 1.4em;
+    }
 
-        .difficulty-screen, .game-container, .modal {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      justify-content: center;
+    }
 
-        .guess {
-            background-color: var(--guess-color) !important;
-            border-radius: 50%;
-        }
-        
-        .atom-revealed {
-            background-image: radial-gradient(circle, #666 20%, var(--dark-border) 80%);
-            border-radius: 50%;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-        }
-    </style>
-</head>
-<body style="background-color: var(--light-bg);">
-    <button id="how-to-play-btn" class="fixed top-4 right-4 z-50 bg-white hover:bg-gray-100 border text-gray-600 font-semibold py-2 px-5 rounded-lg transition shadow-md">How to Play</button>
+    .log-panel {
+      flex: 1 1 250px;
+      min-width: 250px;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      max-height: 500px;
+      margin-top: 120px;
+      display: flex;
+      flex-direction: column;
+    }
 
-    <div class="difficulty-screen w-full max-w-sm mx-auto text-center p-8 bg-light-surface rounded-2xl shadow-2xl" id="difficulty-screen">
-        <h2 class="text-3xl font-bold mb-8 text-light-text-dark">Select Difficulty</h2>
-        <div class="space-y-4">
-            <button onclick="startGame(3)" class="w-full text-lg bg-light-primary-btn hover:bg-gray-200 text-light-text font-semibold py-4 px-4 rounded-xl shadow-lg transition">Easy (3 Atoms)</button>
-            <button onclick="startGame(4)" class="w-full text-lg bg-light-primary-btn hover:bg-gray-200 text-light-text font-semibold py-4 px-4 rounded-xl shadow-lg transition">Medium (4 Atoms)</button>
-            <button onclick="startGame(5)" class="w-full text-lg bg-light-primary-btn hover:bg-gray-200 text-light-text font-semibold py-4 px-4 rounded-xl shadow-lg transition">Hard (5 Atoms)</button>
-        </div>
+    #log-entries {
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    #log-entries div {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .game-area {
+      flex: 2 1 400px;
+      min-width: 300px;
+      text-align: center;
+    }
+
+    .header {
+      position: relative;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #how-to-play-btn {
+      /* --- Changed to be always visible --- */
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      font-size: 0.9em;
+      z-index: 1001; /* To appear above game content */
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(30px, 1fr));
+      gap: 2px;
+      margin: 20px auto;
+      width: 100%;
+      max-width: 500px;
+      transition: box-shadow 0.5s ease-in-out;
+    }
+
+    /* --- Simple winner celebration style --- */
+    .winner-celebration {
+      animation: flash-border 0.5s 3;
+    }
+
+    @keyframes flash-border {
+      0%,
+      100% {
+        box-shadow: 0 0 15px rgba(180, 212, 75, 0);
+      }
+      50% {
+        box-shadow: 0 0 25px 10px rgba(180, 212, 75, 0.9);
+      }
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      background: white;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+    }
+
+    .cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .border {
+      background: var(--primary);
+      color: white;
+      font-size: 0.8em;
+    }
+
+    .atom {
+      background: var(--dark);
+      border-radius: 50%;
+    }
+
+    .guess {
+      background-color: var(--highlight);
+      opacity: 0.7;
+    }
+
+    #guess-count {
+      font-size: 1.2em;
+      margin: 15px 0;
+      font-weight: 600;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 10px;
+      transition: background 0.2s;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background: var(--dark);
+    }
+    
+    #remove-guess-btn {
+        background-color: var(--highlight);
+    }
+    #remove-guess-btn:hover {
+        background-color: var(--reflection);
+    }
+
+    .difficulty-screen {
+      text-align: center;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .difficulty-screen h2 {
+      text-align: center;
+      border: none;
+      font-size: 1.8em;
+      margin-bottom: 30px;
+    }
+
+    .difficulty-screen button {
+      display: block;
+      width: 200px;
+      margin: 15px auto;
+    }
+
+    /* --- Modal Styles --- */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px 30px;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 10px;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-content h2 {
+      text-align: center;
+      border: none;
+      margin-top: 0;
+    }
+
+    .modal-content h4 {
+      margin-top: 20px;
+      margin-bottom: 5px;
+      color: var(--dark);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 3px;
+    }
+    .modal-content p,
+    .modal-content ul {
+      margin-top: 0;
+      text-align: left;
+    }
+    .modal-content ul {
+      padding-left: 20px;
+    }
+    .modal-content li {
+      margin-bottom: 8px;
+    }
+
+    .close-btn {
+      color: #aaa;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 35px;
+      font-weight: bold;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Media Queries for Small Screens */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 10px;
+      }
+
+      .log-panel,
+      .game-area {
+        width: 100%;
+      }
+
+      .board {
+        max-width: 100%;
+        grid-template-columns: repeat(10, 1fr);
+      }
+
+      .cell {
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+  <body>
+    <button id="how-to-play-btn">How to Play</button>
+
+    <div id="rules-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>How to Play</h2>
+        <h4>1. The Goal</h4>
+        <p>
+          Find the hidden atoms inside the box by shooting rays from the
+          numbered ports on the edge.
+        </p>
+        <h4>2. Firing Rays</h4>
+        <p>
+          Click a number to fire a ray. Observe the result in the Game Log.
+          There are 3 possible outcomes:
+        </p>
+        <ul>
+          <li>
+            <strong>Exited:</strong> The ray passed through and exited at a
+            different port.
+          </li>
+          <li>
+            <strong>Hit / Absorbed:</strong> The ray hit an atom head-on.
+          </li>
+          <li>
+            <strong>Reflected:</strong> The ray exited from the same port it
+            entered.
+          </li>
+        </ul>
+        <h4>3. Ray Behavior</h4>
+        <ul>
+          <li>
+            A ray is <strong>deflected 90°</strong> when it passes a cell
+            diagonally adjacent to an atom.
+          </li>
+          <li>
+            A ray is <strong>reflected (U-Turn)</strong> if it passes a cell
+            diagonally adjacent to two atoms.
+          </li>
+          <li>
+            A ray entering right next to an atom on the edge is also
+            <strong>reflected</strong>.
+          </li>
+        </ul>
+        <h4>4. Guessing</h4>
+        <p>
+          Click any cell in the grid to place a guess marker. Click a marker to
+          select it for removal. When you've placed all your guesses, click "Reveal
+          Atoms" to check your score.
+        </p>
+      </div>
     </div>
 
-    <div class="game-container w-full max-w-6xl mx-auto hidden" id="game-container">
-        <div class="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8">
-            
-            <div class="flex-grow flex flex-col items-center">
-                <h1 class="text-4xl font-bold text-dark-text-main">Black Box</h1>
-                <p class="text-dark-text-secondary mb-4">Fire rays to deduce the location of the hidden atoms.</p>
-                <div id="board" class="w-full max-w-xl aspect-square grid grid-cols-10 gap-1 p-2 bg-black rounded-lg shadow-lg"></div>
-            </div>
-
-            <div class="w-full lg:w-80 flex-shrink-0 flex flex-col space-y-6">
-                 <div style="background-color: var(--dark-surface);" class="p-6 rounded-xl shadow-lg">
-                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-dark-text-main" style="border-color: var(--dark-border);">Controls</h2>
-                    <p id="guess-count" class="text-lg text-dark-text-secondary mb-4">Guesses: 0 / 4</p>
-                    <div class="space-y-3">
-                         <button id="reveal" class="w-full text-md text-white font-bold py-3 rounded-lg shadow-md transition-transform transform hover:scale-105" style="background-color: var(--dark-reveal-btn);">Reveal Answer</button>
-                         <button onclick="location.reload()" class="w-full text-md text-white font-bold py-3 rounded-lg shadow-md transition-transform transform hover:scale-105" style="background-color: var(--dark-new-game-btn);">New Game</button>
-                    </div>
-                 </div>
-
-                <div class="log-panel flex-grow p-6 rounded-xl shadow-lg" style="background-color: var(--dark-surface);">
-                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-dark-text-main" style="border-color: var(--dark-border);">Game Log</h2>
-                    <div id="log" class="space-y-2 text-sm text-dark-text-secondary overflow-y-auto h-64"></div>
-                </div>
-            </div>
-
-        </div>
+    <div class="difficulty-screen" id="difficulty-screen">
+      <h2>Select Difficulty</h2>
+      <button onclick="startGame(3)">Easy (3 Atoms)</button>
+      <button onclick="startGame(4)">Medium (4 Atoms)</button>
+      <button onclick="startGame(5)">Hard (5 Atoms)</button>
     </div>
 
-    <div id="rules-modal" class="modal fixed inset-0 flex items-center justify-center p-4 z-50">
-        <div class="modal-content text-dark-text-main w-full max-w-lg p-8 rounded-xl shadow-2xl relative" style="background-color: var(--dark-surface);">
-            <span class="close-btn absolute top-4 right-5 text-3xl text-dark-text-secondary hover:text-dark-text-main cursor-pointer">&times;</span>
-            <h2 class="text-3xl font-bold mb-6 text-center text-dark-text-main">How to Play</h2>
-            <ul class="space-y-4 text-dark-text-secondary">
-                <li>
-                    <strong class="text-dark-text-main text-lg block">1. The Goal</strong>
-                    Find the hidden atoms inside the box by shooting rays from the numbered ports on the edge.
-                </li>
-                <li>
-                    <strong class="text-dark-text-main text-lg block">2. Firing Rays</strong>
-                    Click a number to fire a ray. Observe the result in the Game Log. There are 3 possible outcomes:
-                    <ul class="list-disc list-inside mt-2 pl-4 space-y-1">
-                        <li><strong style="color:var(--path)">Exited:</strong> The ray passed through and exited at a different port.</li>
-                        <li><strong style="color:var(--hit)">Hit / Absorbed:</strong> The ray hit an atom head-on.</li>
-                        <li><strong style="color:var(--reflect)">Reflected:</strong> The ray exited from the same port it entered.</li>
-                    </ul>
-                </li>
-                 <li>
-                    <strong class="text-dark-text-main text-lg block">3. Ray Behavior</strong>
-                    <ul class="list-disc list-inside mt-2 pl-4 space-y-1">
-                        <li>A ray is <strong class="text-dark-highlight">deflected 90°</strong> when it passes a cell diagonally adjacent to an atom.</li>
-                        <li>A ray is <strong class="text-dark-highlight">reflected (U-Turn)</strong> if it passes a cell diagonally adjacent to two atoms.</li>
-                        <li>A ray entering right next to an atom on the edge is also <strong class="text-dark-highlight">reflected</strong>.</li>
-                    </ul>
-                </li>
-                <li>
-                    <strong class="text-dark-text-main text-lg block">4. Guessing</strong>
-                    Click any cell in the grid to place a guess marker (a red circle). Click again to remove it. When you've placed all your guesses, click "Reveal Answer" to check your score.
-                </li>
-            </ul>
+    <div class="container" id="game-container" style="display: none">
+      <div class="game-area">
+        <div class="header">
+          <h1>Black Box</h1>
         </div>
+        <p>Click a border number (1–32) to fire a ray</p>
+        <div id="board" class="board"></div>
+
+        <p id="guess-count">Guesses: 0</p>
+
+        <div class="controls">
+           <button id="remove-guess-btn" style="display: none">
+            Remove Guess
+          </button>
+          <button id="reveal">Reveal Atoms</button>
+          <button onclick="location.reload()">Restart Game</button>
+        </div>
+      </div>
+
+      <div id="log" class="log-panel">
+        <h2>Game Log</h2>
+        <div id="log-entries"></div>
+      </div>
     </div>
 
     <script>
-        // DOM Elements
-        const body = document.body;
-        const board = document.getElementById("board");
-        const log = document.getElementById("log");
-        const guessCountDisplay = document.getElementById("guess-count");
-        const revealBtn = document.getElementById("reveal");
-        const howToPlayBtn = document.getElementById('how-to-play-btn');
+      const board = document.getElementById("board");
+      const logEntries = document.getElementById("log-entries");
+      const guessCountDisplay = document.getElementById("guess-count");
+      const revealBtn = document.getElementById("reveal");
+      const removeGuessBtn = document.getElementById("remove-guess-btn"); // Get the new button
 
-        // Game State
-        let atomCount = 4;
-        const SIZE = 10;
-        let atoms = [];
-        let playerGuesses = [];
-        let usedRays = new Set();
-        let revealed = false;
+      let atomCount = 4;
+      const SIZE = 10;
+      let atoms = [];
+      let guessCount = 0;
+      let playerGuesses = [];
+      let usedRays = new Set();
+      let revealed = false;
 
-        function startGame(count) {
-            atomCount = count;
-            document.getElementById("difficulty-screen").style.display = "none";
-            document.getElementById("game-container").classList.remove("hidden");
-            howToPlayBtn.classList.remove('hidden');
-            body.style.backgroundColor = 'var(--dark-bg)';
-            
-            resetGame();
-            atoms = generateRandomAtoms(atomCount);
-            buildBoard();
-            updateGuessCount();
-            addToLog("Game started. Good luck!");
+      // --- New variable to track which guess to remove ---
+      let selectedGuessForRemoval = null;
+
+      let raysAbsorbed = 0;
+      let raysReflected = 0;
+      let raysExited = 0;
+
+      function startGame(count) {
+        atomCount = count;
+        atoms = generateRandomAtoms(atomCount);
+        document.getElementById("difficulty-screen").style.display = "none";
+        document.getElementById("game-container").style.display = "flex";
+        buildBoard();
+        resetStats();
+        updateGuessCount();
+        revealed = false;
+      }
+
+      function resetStats() {
+        guessCount = 0;
+        raysAbsorbed = 0;
+        raysReflected = 0;
+        raysExited = 0;
+        usedRays.clear();
+        playerGuesses = [];
+        logEntries.innerHTML = "";
+      }
+
+      function generateRandomAtoms(count) {
+        const positions = new Set();
+        while (positions.size < count) {
+          const r = Math.floor(Math.random() * 8) + 1;
+          const c = Math.floor(Math.random() * 8) + 1;
+          positions.add(r * SIZE + c);
         }
+        return Array.from(positions);
+      }
+
+      function buildBoard() {
+        board.innerHTML = "";
+        for (let r = 0; r < SIZE; r++) {
+          for (let c = 0; c < SIZE; c++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+
+            if (
+              (r === 0 || r === SIZE - 1 || c === 0 || c === SIZE - 1) &&
+              !(r === 0 && c === 0) &&
+              !(r === 0 && c === SIZE - 1) &&
+              !(r === SIZE - 1 && c === 0) &&
+              !(r === SIZE - 1 && c === SIZE - 1)
+            ) {
+              const num = getBorderNumber(r, c);
+              if (num !== null) {
+                cell.classList.add("border");
+                cell.textContent = num;
+                cell.id = `border-${num}`;
+                cell.addEventListener("click", () => fireRay(num, cell));
+              }
+            } else {
+              cell.addEventListener("click", () => handleCellClick(r, c));
+            }
+
+            board.appendChild(cell);
+          }
+        }
+      }
+
+      function getBorderNumber(r, c) {
+        if (r === 0 && c >= 1 && c <= 8) return c;
+        if (c === 9 && r >= 1 && r <= 8) return 8 + r;
+        if (r === 9 && c >= 1 && c <= 8) return 25 - c;
+        if (c === 0 && r >= 1 && r <= 8) return 33 - r;
+        return null;
+      }
+
+      function getEntry(num) {
+        if (num >= 1 && num <= 8)
+          return { pos: { r: 0, c: num }, dir: { r: 1, c: 0 } };
+        if (num >= 9 && num <= 16)
+          return { pos: { r: num - 8, c: 9 }, dir: { r: 0, c: -1 } };
+        if (num >= 17 && num <= 24)
+          return { pos: { r: 9, c: 25 - num }, dir: { r: -1, c: 0 } };
+        if (num >= 25 && num <= 32)
+          return { pos: { r: 33 - num, c: 0 }, dir: { r: 0, c: 1 } };
+        return null;
+      }
+
+      function fireRay(entry, cell) {
+        if (usedRays.has(entry) || revealed) return;
+        usedRays.add(entry);
+        cell.style.backgroundColor = "#aaa";
+        guessCount++;
+        updateGuessCount();
+        let { pos, dir } = getEntry(entry);
+        const firstInside = { r: pos.r + dir.r, c: pos.c + dir.c };
+        if (
+          firstInside.r > 0 &&
+          firstInside.r < SIZE - 1 &&
+          firstInside.c > 0 &&
+          firstInside.c < SIZE - 1
+        ) {
+          const firstIdx = firstInside.r * SIZE + firstInside.c;
+          if (atoms.includes(firstIdx)) {
+            raysAbsorbed++;
+            logEntries.innerHTML += `<div>Ray ${entry} → Absorbed</div>`;
+            logEntries.scrollTop = logEntries.scrollHeight;
+            return;
+          }
+          const instantReflect = atoms.some((aIdx) => {
+            const ar = Math.floor(aIdx / SIZE);
+            const ac = aIdx % SIZE;
+            const isFirstInnerLayer =
+              ar === 1 || ar === SIZE - 2 || ac === 1 || ac === SIZE - 2;
+            if (!isFirstInnerLayer) return false;
+            const manhattan =
+              Math.abs(ar - firstInside.r) + Math.abs(ac - firstInside.c);
+            return manhattan === 1;
+          });
+          if (instantReflect) {
+            raysReflected++;
+            logEntries.innerHTML += `<div>Ray ${entry} → Reflected </div>`;
+            logEntries.scrollTop = logEntries.scrollHeight;
+            return;
+          }
+        }
+        let firstMove = true;
+        while (true) {
+          pos = { r: pos.r + dir.r, c: pos.c + dir.c };
+          if (
+            pos.r === 0 ||
+            pos.r === SIZE - 1 ||
+            pos.c === 0 ||
+            pos.c === SIZE - 1
+          ) {
+            const exit = getBorderNumber(pos.r, pos.c);
+            if (exit === entry && firstMove) {
+              raysReflected++;
+              logEntries.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
+              logEntries.scrollTop = logEntries.scrollHeight;
+            } else {
+              raysExited++;
+              logEntries.innerHTML += `<div>Ray ${entry} → Exited at ${exit}</div>`;
+              logEntries.scrollTop = logEntries.scrollHeight;
+            }
+            return;
+          }
+          const idx = pos.r * SIZE + pos.c;
+          if (atoms.includes(idx)) {
+            raysAbsorbed++;
+            logEntries.innerHTML += `<div>Ray ${entry} → Absorbed</div>`;
+            logEntries.scrollTop = logEntries.scrollHeight;
+            return;
+          }
+          const diagonals = getDiagonals(pos);
+          const occupiedDiagonals = diagonals
+            .filter((d) => atoms.includes(d.r * SIZE + d.c))
+            .map((d) => d.name);
+          if (
+            (occupiedDiagonals.includes("NW") &&
+              occupiedDiagonals.includes("SE")) ||
+            (occupiedDiagonals.includes("NE") &&
+              occupiedDiagonals.includes("SW"))
+          ) {
+            if (firstMove) {
+              raysReflected++;
+              logEntries.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
+              logEntries.scrollTop = logEntries.scrollHeight;
+            }
+            return;
+          }
+          if (occupiedDiagonals.length === 1) {
+            dir = deflect(dir, occupiedDiagonals[0]);
+          }
+          firstMove = false;
+        }
+      }
+
+      function getDiagonals(pos) {
+        return [
+          { r: pos.r - 1, c: pos.c - 1, name: "NW" },
+          { r: pos.r - 1, c: pos.c + 1, name: "NE" },
+          { r: pos.r + 1, c: pos.c - 1, name: "SW" },
+          { r: pos.r + 1, c: pos.c + 1, name: "SE" },
+        ];
+      }
+
+      function deflect(dir, diag) {
+        if ((dir.r === 1 && dir.c === 0) || (dir.r === -1 && dir.c === 0)) {
+          return diag === "NW" || diag === "SW"
+            ? { r: 0, c: 1 }
+            : { r: 0, c: -1 };
+        }
+        if ((dir.r === 0 && dir.c === 1) || (dir.r === 0 && dir.c === -1)) {
+          return diag === "NW" || diag === "NE"
+            ? { r: 1, c: 0 }
+            : { r: -1, c: 0 };
+        }
+        return dir;
+      }
+      
+      // --- MODIFIED guess removal logic ---
+      function handleCellClick(r, c) {
+        if (revealed) return;
+
+        const idx = r * SIZE + c;
         
-        function resetGame() {
-            playerGuesses = [];
-            usedRays.clear();
-            revealed = false;
-            log.innerHTML = "";
-            revealBtn.disabled = false;
+        // Case 1: Clicked an existing guess
+        if (playerGuesses.includes(idx)) {
+          selectedGuessForRemoval = idx;
+          removeGuessBtn.style.display = 'inline-block'; // Show the remove button
+        } 
+        // Case 2: Clicked an empty cell to add a new guess
+        else if (playerGuesses.length < atomCount) {
+          playerGuesses.push(idx);
+          board.children[idx].classList.add("guess");
+          // Hide remove button when placing a new guess
+          removeGuessBtn.style.display = 'none';
+          selectedGuessForRemoval = null;
+        }
+      }
+
+      removeGuessBtn.addEventListener('click', () => {
+          if (selectedGuessForRemoval !== null) {
+              // Remove the guess from the array
+              playerGuesses = playerGuesses.filter(i => i !== selectedGuessForRemoval);
+              // Remove the visual class from the cell
+              board.children[selectedGuessForRemoval].classList.remove('guess');
+              // Hide the button and reset the selection
+              removeGuessBtn.style.display = 'none';
+              selectedGuessForRemoval = null;
+          }
+      });
+
+
+      function updateGuessCount() {
+        guessCountDisplay.textContent = `Guesses: ${guessCount}`;
+      }
+
+      revealBtn.addEventListener("click", () => {
+        if (revealed) return;
+        revealed = true;
+        removeGuessBtn.style.display = 'none'; // Hide remove button on reveal
+
+        atoms.forEach((idx) => board.children[idx].classList.add("atom"));
+        let correct = playerGuesses.filter((g) => atoms.includes(g)).length;
+        let message = `Game Over! You guessed ${correct}/${atomCount} atom(s) correctly.`;
+
+        // --- SIMPLIFIED winner celebration ---
+        if (correct === atomCount) {
+          message = `Congratulations! You found all ${atomCount} atoms.`;
+          board.classList.add('winner-celebration');
+          setTimeout(() => {
+              board.classList.remove('winner-celebration');
+          }, 1500); // Animation lasts 1.5s
+        } else if (correct >= atomCount - 1) {
+          message += " Very Good!";
+        } else if (correct === 0) {
+          message += " Try again!";
         }
 
-        function generateRandomAtoms(count) {
-            const positions = new Set();
-            while (positions.size < count) {
-                const r = Math.floor(Math.random() * (SIZE - 2)) + 1; // 1 to 8
-                const c = Math.floor(Math.random() * (SIZE - 2)) + 1; // 1 to 8
-                positions.add(r * SIZE + c);
-            }
-            return Array.from(positions);
+        logEntries.innerHTML += `<div><strong>${message}</strong></div>`;
+        logEntries.scrollTop = logEntries.scrollHeight;
+      });
+
+      // --- Modal Logic ---
+      const modal = document.getElementById("rules-modal");
+      const howToPlayBtn = document.getElementById("how-to-play-btn");
+      const closeBtn = document.querySelector(".close-btn");
+
+      howToPlayBtn.addEventListener("click", () => {
+        modal.style.display = "block";
+      });
+
+      closeBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+
+      window.addEventListener("click", (event) => {
+        if (event.target == modal) {
+          modal.style.display = "none";
         }
-
-        function buildBoard() {
-            board.innerHTML = "";
-            for (let r = 0; r < SIZE; r++) {
-                for (let c = 0; c < SIZE; c++) {
-                    const cell = document.createElement("div");
-                    const isBorder = r === 0 || r === SIZE - 1 || c === 0 || c === SIZE - 1;
-                    const isCorner = isBorder && ((r === 0 && c === 0) || (r === 0 && c === SIZE - 1) || (r === SIZE - 1 && c === 0) || (r === SIZE - 1 && c === SIZE - 1));
-                    
-                    if (isCorner) {
-                        cell.className = "bg-black rounded-sm";
-                    } else if (isBorder) {
-                        const num = getBorderNumber(r, c);
-                        cell.className = "border flex items-center justify-center font-semibold text-dark-text-main rounded-md cursor-pointer transition-colors";
-                        cell.style.backgroundColor = 'var(--dark-border)';
-                        cell.textContent = num;
-                        cell.id = `border-${num}`;
-                        cell.addEventListener("click", () => fireRay(num, cell));
-                    } else {
-                         cell.className = "cell rounded-md cursor-pointer transition-colors border border-gray-900";
-                         cell.style.backgroundColor = 'var(--dark-surface)';
-                         cell.addEventListener('click', () => handleCellClick(r, c));
-                    }
-                    board.appendChild(cell);
-                }
-            }
-        }
-
-        function getBorderNumber(r, c) {
-            const edgeSize = SIZE - 2;
-            if (r === 0) return c;
-            if (c === SIZE - 1) return edgeSize + r;
-            if (r === SIZE - 1) return edgeSize * 2 + (edgeSize - c + 1);
-            if (c === 0) return edgeSize * 3 + (edgeSize - r + 1);
-            return null;
-        }
-
-        function getEntry(num) {
-            const edgeSize = SIZE - 2;
-            if (num >= 1 && num <= edgeSize) 
-                return { pos: { r: 0, c: num }, dir: { r: 1, c: 0 } };
-            if (num >= edgeSize + 1 && num <= edgeSize * 2) 
-                return { pos: { r: num - edgeSize, c: SIZE - 1 }, dir: { r: 0, c: -1 } };
-            if (num >= edgeSize * 2 + 1 && num <= edgeSize * 3)
-                return { pos: { r: SIZE - 1, c: edgeSize * 3 + 1 - num }, dir: { r: -1, c: 0 } };
-            if (num >= edgeSize * 3 + 1 && num <= edgeSize * 4)
-                return { pos: { r: edgeSize * 4 + 1 - num, c: 0 }, dir: { r: 0, c: 1 } };
-            return null;
-        }
-
-        function fireRay(entryNum, cell) {
-            if (usedRays.has(entryNum) || revealed) return;
-            usedRays.add(entryNum);
-            cell.style.backgroundColor = "#2d3748"; // Used port color
-
-            let { pos, dir } = getEntry(entryNum);
-
-            // Edge reflection check
-            const nextR = pos.r + dir.r;
-            const nextC = pos.c + dir.c;
-            if (atoms.some(a => a === (nextR - dir.c) * SIZE + (nextC - dir.r)) ||
-                atoms.some(a => a === (nextR + dir.c) * SIZE + (nextC + dir.r))) {
-                addToLog(`Ray ${entryNum} → <strong style="color:var(--reflect)">Reflected</strong>`);
-                return;
-            }
-
-            for(let i=0; i < 50; i++) { // Loop limit
-                pos.r += dir.r;
-                pos.c += dir.c;
-
-                if (pos.r <= 0 || pos.r >= SIZE - 1 || pos.c <= 0 || pos.c >= SIZE - 1) {
-                    const exitNum = getBorderNumber(pos.r, pos.c);
-                    if (exitNum === entryNum) {
-                        addToLog(`Ray ${entryNum} → <strong style="color:var(--reflect)">Reflected</strong>`);
-                    } else {
-                        addToLog(`Ray ${entryNum} → <strong style="color:var(--path)">Exited at ${exitNum}</strong>`);
-                    }
-                    return;
-                }
-
-                const idx = pos.r * SIZE + pos.c;
-                if (atoms.includes(idx)) {
-                    addToLog(`Ray ${entryNum} → <strong style="color:var(--hit)">Absorbed (Hit)</strong>`);
-                    return;
-                }
-                
-                const tl = atoms.includes((pos.r - 1) * SIZE + (pos.c - 1));
-                const tr = atoms.includes((pos.r - 1) * SIZE + (pos.c + 1));
-                const bl = atoms.includes((pos.r + 1) * SIZE + (pos.c - 1));
-                const br = atoms.includes((pos.r + 1) * SIZE + (pos.c + 1));
-
-                const oldDir = {...dir};
-                if (dir.r === 1) { // Moving Down
-                    if (tl && tr) { dir = {r: -1, c: 0}; } else if (tl) { dir = {r: 0, c: 1}; } else if (tr) { dir = {r: 0, c: -1}; }
-                } else if (dir.r === -1) { // Moving Up
-                    if (bl && br) { dir = {r: 1, c: 0}; } else if (bl) { dir = {r: 0, c: 1}; } else if (br) { dir = {r: 0, c: -1}; }
-                } else if (dir.c === 1) { // Moving Right
-                    if (tl && bl) { dir = {r: 0, c: -1}; } else if (tl) { dir = {r: 1, c: 0}; } else if (bl) { dir = {r: -1, c: 0}; }
-                } else if (dir.c === -1) { // Moving Left
-                    if (tr && br) { dir = {r: 0, c: 1}; } else if (tr) { dir = {r: 1, c: 0}; } else if (br) { dir = {r: -1, c: 0}; }
-                }
-
-                if (dir.r === -oldDir.r && dir.c === -oldDir.c) {
-                    addToLog(`Ray ${entryNum} → <strong style="color:var(--reflect)">Reflected</strong>`);
-                    return;
-                }
-            }
-            addToLog(`Ray ${entryNum} → Path Lost`);
-        }
-        
-        function handleCellClick(r, c) {
-            if (revealed) return;
-            const idx = r * SIZE + c;
-            const cell = board.children[idx];
-            const guessIndex = playerGuesses.indexOf(idx);
-
-            if (guessIndex > -1) {
-                playerGuesses.splice(guessIndex, 1);
-                cell.classList.remove("guess");
-            } else if (playerGuesses.length < atomCount) {
-                playerGuesses.push(idx);
-                cell.classList.add("guess");
-            }
-            updateGuessCount();
-        }
-
-        function updateGuessCount() {
-            guessCountDisplay.textContent = `Guesses: ${playerGuesses.length} / ${atomCount}`;
-        }
-
-        function addToLog(message) {
-            const div = document.createElement('div');
-            div.innerHTML = `> ${message}`;
-            log.prepend(div);
-        }
-
-        revealBtn.addEventListener("click", () => {
-            if (revealed) return;
-            revealed = true;
-            revealBtn.disabled = true;
-
-            let correct = 0;
-            playerGuesses.forEach(idx => {
-                const cell = board.children[idx];
-                cell.classList.remove('guess');
-                if (atoms.includes(idx)) {
-                    correct++;
-                    cell.style.backgroundColor = 'var(--atom-correct)';
-                } else {
-                    cell.style.backgroundColor = 'var(--hit)';
-                    cell.classList.add('opacity-70');
-                }
-            });
-            
-            atoms.forEach(idx => {
-                const cell = board.children[idx];
-                cell.classList.add('atom-revealed');
-                if (!playerGuesses.includes(idx)) {
-                     cell.style.border = '2px solid var(--atom-correct)';
-                }
-            });
-            
-            let message = `You found ${correct} of ${atomCount} atoms.`;
-            if (correct === atomCount && playerGuesses.length === atomCount) {
-                message = `<strong>Congratulations! You found all ${atomCount} atoms!</strong>`;
-            }
-            addToLog(message);
-        });
-
-        // Modal Logic
-        const modal = document.getElementById('rules-modal');
-        const closeBtn = document.querySelector('.close-btn');
-
-        howToPlayBtn.addEventListener('click', () => modal.classList.remove('hidden'));
-        closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
-        window.addEventListener('click', (event) => {
-            if (event.target == modal) modal.classList.add('hidden');
-        });
+      });
     </script>
-</body>
+  </body>
 </html>
-
