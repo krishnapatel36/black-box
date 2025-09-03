@@ -1,597 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Black Box Game</title>
-  </head>
-  <style>
-    :root {
-      --primary: rgba(180, 212, 75);
-      --dark: #2c3e50;
-      --light: #ecf0f1;
-      --highlight: #e74c3c;
-    }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black Box Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
-    body {
-      font-family: "Segoe UI", Roboto, sans-serif;
-      background-color: #fefbe3;
-      color: var(--dark);
-      margin: 0;
-      padding: 20px;
-      line-height: 1.6;
-    }
+  <div class="difficulty-screen" id="difficulty-screen">
+    <h2>Select Difficulty</h2>
+    <button onclick="startGame(3)">Easy (3 Atoms)</button>
+    <button onclick="startGame(4)">Medium (4 Atoms)</button>
+    <button onclick="startGame(5)">Hard (5 Atoms)</button>
+  </div>
 
-    h1 {
-      color: var(--dark);
-      text-align: center;
-      margin: 0;
-      font-size: 2.2em;
-    }
-
-    h2 {
-      color: var(--dark);
-      border-bottom: 2px solid var(--primary);
-      padding-bottom: 5px;
-      margin-top: 0;
-      margin-bottom: 15px;
-      font-size: 1.4em;
-    }
-
-    .header {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      padding: 10px 0 20px 0;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .rules-btn {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-      justify-content: center;
-      align-items: flex-start;
-    }
-
-    .log-panel {
-      flex: 1 1 250px;
-      min-width: 250px;
-      background: #ffffff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      height: 450px;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .log-content {
-      overflow-y: auto;
-      flex-grow: 1;
-    }
-
-    .log-content div {
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    .game-area {
-      flex: 2 1 400px;
-      min-width: 300px;
-      text-align: center;
-    }
-
-    .board {
-      display: grid;
-      grid-template-columns: repeat(10, minmax(30px, 1fr));
-      gap: 2px;
-      margin: 20px auto;
-      width: 100%;
-      max-width: 500px;
-    }
-
-    .cell {
-      aspect-ratio: 1;
-      background: white;
-      border: 1px solid #ddd;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.9rem;
-    }
-
-    .cell:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .border {
-      background: var(--primary);
-      color: white;
-      font-size: 0.8em;
-    }
-
-    .atom {
-      background: var(--dark);
-      border-radius: 50%;
-    }
-
-    .guess {
-      background-color: var(--highlight);
-      opacity: 0.7;
-    }
-
-    #guess-count {
-      font-size: 1.2em;
-      margin: 15px 0;
-      font-weight: 600;
-    }
-
-    button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 1em;
-      border-radius: 6px;
-      cursor: pointer;
-      margin: 5px;
-      transition: background 0.2s;
-      font-weight: 600;
-    }
-
-    button:hover {
-      background: var(--dark);
-    }
-
-    .difficulty-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      max-width: 500px;
-      margin: 50px auto;
-      padding: 30px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .difficulty-screen button {
-      width: 100%;
-      margin: 10px 0;
-    }
-
-    /* --- Rules Modal & Visuals Styles --- */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 100;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0, 0, 0, 0.6);
-    }
-
-    .modal-content {
-      background-color: #fefefe;
-      margin: 5% auto;
-      padding: 20px;
-      width: 90%;
-      max-width: 500px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      position: relative;
-    }
-
-    .close-button {
-      color: #aaa;
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    .carousel {
-      position: relative;
-      text-align: center;
-    }
-    .slide { display: none; padding: 10px 0; }
-    .slide p { font-size: 1.1em; margin-bottom: 10px; min-height: 40px; }
-    
-    .prev,
-    .next {
-      cursor: pointer;
-      position: absolute;
-      top: 55%;
-      transform: translateY(-50%);
-      padding: 8px 16px;
-      font-size: 2em;
-      font-weight: bold;
-      user-select: none;
-      color: var(--dark);
-      background: rgba(255,255,255,0.5);
-      border-radius: 50%;
-      line-height: 1;
-      z-index: 5;
-    }
-    .prev { left: 5px; }
-    .next { right: 5px; }
-    .prev:hover, .next:hover { color: white; background: var(--primary); }
-
-    .dots { text-align: center; margin-top: 10px; }
-    .dot {
-        cursor: pointer;
-        height: 12px;
-        width: 12px;
-        margin: 0 4px;
-        background-color: #bbb;
-        border-radius: 50%;
-        display: inline-block;
-        transition: background-color 0.3s ease;
-    }
-    .active-dot { background-color: var(--primary); }
-
-    .visual-aid {
-      margin: 10px auto;
-      width: 80%;
-      max-width: 210px;
-      aspect-ratio: 1;
-      border: 1px solid #ccc;
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: repeat(7, 1fr);
-      position: relative;
-    }
-    .vis-cell {
-      border: 1px solid #f0f0f0;
-      position: relative;
-    }
-    .vis-atom-cell::after {
-      content: '';
-      position: absolute;
-      top: 15%; left: 15%;
-      width: 70%; height: 70%;
-      background: var(--dark);
-      border-radius: 50%;
-    }
-    .vis-ray-cell {
-      background-color: rgba(180, 212, 75, 0.5); 
-    }
-    .vis-arrow {
-      position: absolute;
-      color: var(--highlight);
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    @media (max-width: 768px) {
-      .header { flex-direction: column; gap: 15px; }
-      .rules-btn { position: static; transform: none; }
-      .container { flex-direction: column; padding: 10px; }
-      .log-panel { height: 300px; }
-      .board { max-width: 100%; }
-      .modal-content { margin: 10% auto; padding: 15px; }
-      .slide p { font-size: 1em; min-height: 3.2em; }
-    }
-  </style>
-  <body>
-    <div class="difficulty-screen" id="difficulty-screen">
-      <h2>Select Difficulty</h2>
-      <button onclick="startGame(3)">Easy (3 Atoms)</button>
-      <button onclick="startGame(4)">Medium (4 Atoms)</button>
-      <button onclick="startGame(5)">Hard (5 Atoms)</button>
-    </div>
-
-    <div id="game-container" style="display: none">
+  <div class="container" id="game-container" style="display: none;">
+    <div class="game-area">
       <div class="header">
         <h1>Black Box</h1>
-        <button id="show-rules-btn" class="rules-btn">Rules</button>
+        <button id="how-to-play-btn">How to Play</button>
       </div>
-      <div class="container">
-        <div class="game-area">
-          <p>Click a border number (1–32) to fire a ray</p>
-          <div id="board" class="board"></div>
-          <p id="guess-count">Rays Fired: 0</p>
-          <div class="controls">
-            <button id="reveal">Reveal Atoms</button>
-            <button onclick="location.reload()">Restart Game</button>
-          </div>
-        </div>
-        <div class="log-panel">
-            <h2>Game Log</h2>
-            <div id="log-content" class="log-content"></div>
-        </div>
+      <p>Click a border number (1–32) to fire a ray</p>
+      <div id="board" class="board"></div>
+
+      <p id="guess-count">Guesses: 0</p>
+
+      <div class="controls">
+        <button id="reveal">Reveal Atoms</button>
+        <button onclick="location.reload()">Restart Game</button>
       </div>
     </div>
 
-    <div id="rules-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>How to Play</h2>
-        <div class="carousel">
-          <a class="prev">&lt;</a>
-          <a class="next">&gt;</a>
-          <div class="slide" data-vis='{"rays": ["3_0","3_1","3_2","3_3","3_4","3_5","3_6"], "arrows": [{"pos": "top", "cell": "3_0"}, {"pos": "bottom", "cell": "3_6"}]}'>
-            <p><strong>Straight Path:</strong> A ray far from any atoms passes straight through.</p>
-          </div>
-          <div class="slide" data-vis='{"atoms": ["3_3"], "rays": ["3_0","3_1","3_2"], "arrows": [{"pos": "top", "cell": "3_0"}]}'>
-            <p><strong>Absorption:</strong> A direct hit on an atom absorbs the ray (No Output).</p>
-          </div>
-          <div class="slide" data-vis='{"atoms": ["4_4"], "rays": ["0_3","1_3","2_3","3_3","3_4","3_5","3_6"], "arrows": [{"pos": "left", "cell": "0_3"}, {"pos": "bottom", "cell": "3_6"}]}'>
-            <p><strong>Deflection:</strong> A ray passing an atom diagonally is deflected 90 degrees.</p>
-          </div>
-          <div class="slide" data-vis='{"atoms": ["1_3"], "arrows": [{"pos": "top", "cell": "3_0"}, {"pos": "top-rev", "cell": "3_0"}]}'>
-            <p><strong>Reflection (Edge):</strong> An atom adjacent to the entry causes an immediate reflection.</p>
-          </div>
-          <div class="slide" data-vis='{"atoms": ["1_2", "2_1"], "rays": ["1_0", "1_1", "2_1", "2_2"], "arrows": [{"pos": "top", "cell": "1_0"}, {"pos": "top-rev", "cell": "1_0"}]}'>
-            <p><strong>Reflection (Detour):</strong> Two deflections can cause a 180° turn, returning the ray.</p>
+    <div id="log" class="log-panel">
+      <h2>Game Log</h2>
+    </div>
+  </div>
+
+  <div id="rules-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>How to Play</h2>
+      <div class="carousel">
+
+        <div class="slide">
+          <h3>1. Absorption (Hit)</h3>
+          <p>Rays that strike an atom directly are <strong>Absorbed</strong>.</p>
+          <div class="visual-grid">
+            <svg class="ray-svg" viewBox="0 0 185 185">
+                <defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e74c3c"></path></marker></defs>
+                <line x1="73.5" y1="0" x2="73.5" y2="50" stroke="#e74c3c" stroke-width="3" marker-end="url(#arrow)"></line>
+            </svg>
+            <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border entry"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"><div class="visual-atom"></div></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
           </div>
         </div>
-        <div class="dots"></div>
+
+        <div class="slide">
+          <h3>2. Deflection</h3>
+          <p>A ray passing a diagonally adjacent atom is <strong>deflected 90°</strong>.</p>
+          <div class="visual-grid">
+            <svg class="ray-svg" viewBox="0 0 185 185">
+                <polyline points="73.5,0 73.5,55 168,55" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#arrow)"></polyline>
+            </svg>
+             <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border entry"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
+            <div class="visual-border"></div><div class="visual-cell"><div class="visual-atom"></div></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border exit"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
+          </div>
+        </div>
+        
+        <div class="slide">
+          <h3>3. Reflection</h3>
+          <p>Rays aimed between two adjacent atoms are <strong>Reflected</strong>.</p>
+           <div class="visual-grid">
+            <svg class="ray-svg" viewBox="0 0 185 185">
+                <line x1="77.5" y1="0" x2="77.5" y2="62" stroke="#e74c3c" stroke-width="3" marker-end="url(#arrow)"></line>
+                <line x1="72.5" y1="62" x2="72.5" y2="0" stroke="#c0392b" stroke-width="3" marker-end="url(#arrow)"></line>
+            </svg>
+             <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border entry exit"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-border"></div><div class="visual-cell"><div class="visual-atom"></div></div><div class="visual-cell"><div class="visual-atom"></div></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
+          </div>
+        </div>
+
+        <div class="slide">
+          <h3>4. Reflection</h3>
+          <p>Rays entering next to an atom on the edge are <strong>Reflected</strong>.</p>
+          <div class="visual-grid">
+            <svg class="ray-svg" viewBox="0 0 185 185">
+                <line x1="124" y1="46.5" x2="98" y2="46.5" stroke="#e74c3c" stroke-width="3" marker-end="url(#arrow)"></line>
+                <line x1="98" y1="51.5" x2="124" y2="51.5" stroke="#c0392b" stroke-width="3" marker-end="url(#arrow)"></line>
+            </svg>
+             <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"><div class="visual-atom"></div></div><div class="visual-cell"></div><div class="visual-border entry exit"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
+          </div>
+        </div>
+
+        <div class="slide">
+          <h3>5. Straight Path</h3>
+          <p>Unaffected rays travel in a <strong>straight line</strong>.</p>
+           <div class="visual-grid">
+            <svg class="ray-svg" viewBox="0 0 185 185">
+                <line x1="73.5" y1="0" x2="73.5" y2="150" stroke="#e74c3c" stroke-width="3" marker-end="url(#arrow)"></line>
+            </svg>
+             <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border entry"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-border"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-cell"></div><div class="visual-border"></div>
+            <div class="visual-corner"></div><div class="visual-border"></div><div class="visual-border exit"></div><div class="visual-border"></div><div class="visual-border"></div><div class="visual-corner"></div>
+          </div>
+        </div>
+
+      </div>
+      <div class="carousel-nav">
+        <button id="prev-btn">&lt; Prev</button>
+        <button id="next-btn">Next &gt;</button>
       </div>
     </div>
+  </div>
 
-    <script>
-      const board = document.getElementById("board");
-      const logContent = document.getElementById("log-content");
-      const guessCountDisplay = document.getElementById("guess-count");
-      const revealBtn = document.getElementById("reveal");
-
-      let atomCount = 4;
-      const SIZE = 10;
-      let atoms = [];
-      let guessCount = 0;
-      let playerGuesses = [];
-      let usedRays = new Set();
-      let revealed = false;
-
-      function startGame(count) {
-        atomCount = count;
-        atoms = generateRandomAtoms(atomCount);
-        document.getElementById("difficulty-screen").style.display = "none";
-        document.getElementById("game-container").style.display = "block";
-        buildBoard();
-        resetStats();
-        updateGuessCount();
-      }
-
-      function resetStats() {
-        guessCount = 0;
-        usedRays.clear();
-        playerGuesses = [];
-        revealed = false;
-        logContent.innerHTML = "";
-      }
-
-      function generateRandomAtoms(count) {
-        const positions = new Set();
-        while (positions.size < count) {
-          const r = Math.floor(Math.random() * 8) + 1;
-          const c = Math.floor(Math.random() * 8) + 1;
-          positions.add(r * SIZE + c);
-        }
-        return Array.from(positions);
-      }
-      
-      function logMessage(message) {
-        logContent.innerHTML += `<div>${message}</div>`;
-        logContent.scrollTop = logContent.scrollHeight;
-      }
-
-      function buildBoard() {
-        board.innerHTML = "";
-        for (let r = 0; r < SIZE; r++) {
-          for (let c = 0; c < SIZE; c++) {
-            const cell = document.createElement("div");
-            cell.classList.add("cell");
-            if ((r > 0 && r < SIZE - 1) && (c > 0 && c < SIZE - 1)) {
-              cell.addEventListener("click", () => handleCellClick(r, c));
-            } else if ((r === 0 || r === SIZE - 1 || c === 0 || c === SIZE - 1) && !(r === c || r + c === SIZE - 1)) {
-              const num = getBorderNumber(r, c);
-              if (num !== null) {
-                cell.classList.add("border");
-                cell.textContent = num;
-                cell.id = `border-${num}`;
-                cell.addEventListener("click", () => fireRay(num, cell));
-              }
-            }
-            board.appendChild(cell);
-          }
-        }
-      }
-
-      // --- BOARD NUMBERING REVERTED & FIXED ---
-      function getBorderNumber(r, c) {
-        if (r === 0 && c >= 1 && c <= 8) return c; // Top: 1-8
-        if (c === 9 && r >= 1 && r <= 8) return 8 + r; // Right: 9-16
-        if (r === 9 && c >= 1 && c <= 8) return 25 - c; // Bottom: 17-24 (Reversed)
-        if (c === 0 && r >= 1 && r <= 8) return 33 - r; // Left: 25-32 (Reversed)
-        return null;
-      }
-
-      function getEntry(num) {
-        if (num >= 1 && num <= 8) return { pos: { r: 0, c: num }, dir: { r: 1, c: 0 } };
-        if (num >= 9 && num <= 16) return { pos: { r: num - 8, c: 9 }, dir: { r: 0, c: -1 } };
-        if (num >= 17 && num <= 24) return { pos: { r: 9, c: 25 - num }, dir: { r: -1, c: 0 } };
-        if (num >= 25 && num <= 32) return { pos: { r: 33 - num, c: 0 }, dir: { r: 0, c: 1 } };
-        return null;
-      }
-
-      function fireRay(entry, cell) {
-        if (usedRays.has(entry) || revealed) return;
-        usedRays.add(entry);
-        cell.style.backgroundColor = "#aaa";
-        guessCount++;
-        updateGuessCount();
-
-        let { pos, dir } = getEntry(entry);
-        let firstMove = true;
-        
-        while (true) {
-            pos = { r: pos.r + dir.r, c: pos.c + dir.c };
-
-            if (getBorderNumber(pos.r, pos.c) !== null) {
-                if (firstMove) {
-                    logMessage(`Ray ${entry} → Reflected`);
-                } else {
-                    const exit = getBorderNumber(pos.r, pos.c);
-                    logMessage(`Ray ${entry} → Exited at ${exit}`);
-                    const exitCell = document.getElementById(`border-${exit}`);
-                    if (exitCell) exitCell.style.backgroundColor = '#aaa';
-                }
-                return;
-            }
-
-            if (atoms.includes(pos.r * SIZE + pos.c)) {
-                logMessage(`Ray ${entry} → Absorbed`);
-                return;
-            }
-            
-            if (firstMove) {
-                const isAdjacent = (p1, p2) => Math.abs(p1.r - p2.r) + Math.abs(p1.c - p2.c) === 1;
-                const adjacentAtoms = atoms.map(idx => ({r: Math.floor(idx/SIZE), c: idx%SIZE})).filter(atomPos => isAdjacent(atomPos, pos));
-                if (adjacentAtoms.length > 0) {
-                    logMessage(`Ray ${entry} → Reflected`);
-                    return;
-                }
-            }
-            
-            const getDiagonals = p => [{ r: p.r - 1, c: p.c - 1, name: "NW" },{ r: p.r - 1, c: p.c + 1, name: "NE" },{ r: p.r + 1, c: p.c - 1, name: "SW" },{ r: p.r + 1, c: p.c + 1, name: "SE" }];
-            const occupiedDiagonals = getDiagonals(pos).filter(d => atoms.includes(d.r * SIZE + d.c)).map(d => d.name);
-            
-            if ((occupiedDiagonals.includes("NW") && occupiedDiagonals.includes("SE")) || (occupiedDiagonals.includes("NE") && occupiedDiagonals.includes("SW"))) {
-                logMessage(`Ray ${entry} → Reflected`);
-                return;
-            }
-            
-            if (occupiedDiagonals.length === 1) {
-                if (dir.c === 0) dir = { r: 0, c: (occupiedDiagonals[0].includes("W")) ? -1 : 1 };
-                else if (dir.r === 0) dir = { r: (occupiedDiagonals[0].includes("N")) ? -1 : 1, c: 0 };
-            }
-            firstMove = false;
-        }
-      }
-
-      function handleCellClick(r, c) {
-        if (revealed) return;
-        const idx = r * SIZE + c;
-        const cellNode = board.children[r * SIZE + c];
-        if (playerGuesses.includes(idx)) {
-          playerGuesses = playerGuesses.filter((i) => i !== idx);
-          cellNode.classList.remove("guess");
-        } else if (playerGuesses.length < atomCount) {
-          playerGuesses.push(idx);
-          cellNode.classList.add("guess");
-        }
-      }
-
-      function updateGuessCount() {
-        guessCountDisplay.textContent = `Rays Fired: ${guessCount}`;
-      }
-
-      revealBtn.addEventListener("click", () => {
-        if (revealed) return;
-        revealed = true;
-        atoms.forEach((idx) => {
-            const cell = board.children[idx];
-            if(cell) cell.classList.add("atom");
-        });
-        let correct = playerGuesses.filter((g) => atoms.includes(g)).length;
-        let message = `Game Over! You found ${correct} of ${atomCount} atom(s).`;
-        logMessage(`<strong>${message}</strong>`);
-      });
-
-      /* --- Rules Modal & Carousel Logic (Manual Control) --- */
-      const modal = document.getElementById("rules-modal");
-      const showRulesBtn = document.getElementById("show-rules-btn");
-      const closeBtn = document.querySelector(".close-button");
-      const prevBtn = document.querySelector(".prev");
-      const nextBtn = document.querySelector(".next");
-      const slides = Array.from(document.querySelectorAll(".slide"));
-      const dotsContainer = document.querySelector(".dots");
-      let currentSlide = 0;
-
-      slides.forEach((slide, index) => {
-        const visData = JSON.parse(slide.dataset.vis);
-        const visualAid = document.createElement('div');
-        visualAid.className = 'visual-aid';
-        const cells = {};
-
-        for (let r = 0; r < 7; r++) {
-            for (let c = 0; c < 7; c++) {
-                const cell = document.createElement('div');
-                cell.className = 'vis-cell';
-                visualAid.appendChild(cell);
-                cells[`${c}_${r}`] = cell;
-            }
-        }
-        
-        visData.atoms?.forEach(pos => cells[pos]?.classList.add('vis-atom-cell'));
-        visData.rays?.forEach(pos => cells[pos]?.classList.add('vis-ray-cell'));
-        visData.arrows?.forEach(arrow => {
-          const arrowEl = document.createElement('div');
-          arrowEl.className = 'vis-arrow';
-          const [c,r] = arrow.cell.split('_').map(Number);
-          
-          const styleMap = {
-            top: { text: '⬇', top: '-25px', left: `${c*14.28 + 3}%` },
-            bottom: { text: '⬇', bottom: '-25px', left: `${c*14.28 + 3}%` },
-            left: { text: '➡', left: '-20px', top: `${r*14.28 + 1}%` },
-            'top-rev': { text: '⬆', top: '-5px', left: `${c*14.28 + 3}%` },
-          };
-
-          const styles = styleMap[arrow.pos];
-          arrowEl.textContent = styles.text;
-          Object.assign(arrowEl.style, styles);
-          visualAid.appendChild(arrowEl);
-        });
-
-        slide.appendChild(visualAid);
-        dotsContainer.innerHTML += `<span class="dot" data-index="${index}"></span>`;
-      });
-      const dots = Array.from(dotsContainer.querySelectorAll(".dot"));
-
-      function showSlide(n) {
-          currentSlide = (n + slides.length) % slides.length;
-          slides.forEach(s => s.style.display = 'none');
-          dots.forEach(d => d.classList.remove('active-dot'));
-          slides[currentSlide].style.display = 'block';
-          dots[currentSlide].classList.add('active-dot');
-      }
-
-      showRulesBtn.onclick = () => { 
-        modal.style.display = "block"; 
-        showSlide(0);
-      }
-      closeBtn.onclick = () => { modal.style.display = "none"; }
-      window.onclick = (e) => { if (e.target == modal) { modal.style.display = "none"; } }
-      
-      prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
-      nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
-      dots.forEach(dot => dot.addEventListener('click', (e) => {
-          showSlide(Number(e.target.dataset.index));
-      }));
-    </script>
-  </body>
+  <script src="script.js"></script>
+</body>
 </html>
